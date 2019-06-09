@@ -9,12 +9,16 @@ from getpass import getpass as password
 
 
 class Metadata:
-    def __init__(self, directory: str, tags: tuple):
+    def __init__(self, directory: str, tags: tuple, **kwargs):
         self.directory = directory
         self.tags = tuple(["[" + tag + "]" for tag in tags])
         self.user, self.host = input("user@host >> ").split("@")
         self.password = password(self.user + "@" + self.host + "'s password: ")
-        self.sql_connection = sql.connect(host=self.host, user=self.user, password=self.password)
+        if "database" in kwargs.keys():
+            self.sql_database = kwargs["database"]
+            self.sql_connection = sql.connect(host=self.host, user=self.user, password=self.password, database=self.sql_database)
+        else:
+            self.sql_connection = sql.connect(host=self.host, user=self.user, password=self.password)
         self.sql_cursor = self.sql_connection.cursor()
 
     def create_all(self, overwrite=False, **kwargs) -> None:
