@@ -70,8 +70,23 @@ class Metadata:
             unknown += [metadata_lines[i - 1].strip() + " " + dir for i in range(1, len(metadata_lines)) if metadata_lines[i] == "\n" and metadata_lines[i - 1].startswith("[")]
         return unknown
 
-    def update_database(self):
-        self.sql_cursor.execute("")
+    def update_table(self, table: str):
+        dirs = [dirs for root, dirs, files in os.walk(self.directory) if dirs][0]
+        for dir in dirs:
+            self.update_table_columns(dir, table)
+        # Remove empty columns
+
+    def update_table_columns(self, dir: str, table: str):
+        if os.path.exists(os.path.join(self.directory, dir, "metadata.txt")):
+            with open(os.path.join(self.directory, dir, "metadata.txt"), "r") as metadata_file:
+                metadata_lines = metadata_file.readlines()
+            tags = [line.strip()[1:-1] for line in metadata_lines if line.startswith("[")]
+            self.sql_cursor.execute("desc " + table + ";")
+            column_names = [x[0] for x in cursor.fetchall()]
+            for tag in tags:
+                if tag not in column_names:
+                    self.sql_cursor.execute("alter table " + table + " add " + tag + " text;")
+                    self.sql_cursor.fetchall()
 
     def cleanup(self):
         self.sql_connection.close()
