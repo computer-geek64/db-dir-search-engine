@@ -118,6 +118,7 @@ class Metadata:
             values = {}
             for tag in self.tags:
                 values[tag[1:-1]] = " ".join(map(lambda x: x.strip(), metadata_lines[metadata_lines.index(tag + "\n") + 1:metadata_lines[metadata_lines.index(tag + "\n"):].index("\n")]))
+                print(values[tag[1:-1]])
                 values[tag[1:-1]] = "NULL" if values[tag[1:-1]] == "" else values[tag[1:-1]]
             self.sql_cursor.execute("INSERT INTO " + self.table + " (" + ", ".join(map(lambda x: x[1:-1], self.tags)) + ") VALUES (" + ", ".join([values[tag[1:-1]] for tag in self.tags]) + ");")
             #self.sql_cursor.fetchall()
