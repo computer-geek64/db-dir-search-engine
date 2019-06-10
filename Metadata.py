@@ -82,7 +82,7 @@ class Metadata:
             self.update_table_values(dir)
         # Add FULLTEXT INDEX
         self.sql_cursor.execute("CREATE FULLTEXT INDEX fulltextindex ON " + self.table + " (" + ", ".join(map(lambda x: x[1:-1], self.tags)) + ");")
-        self.sql_cursor.fetchall()
+        #self.sql_cursor.fetchall()
 
         """
         self.update_table_columns(dir, self.table)
