@@ -74,7 +74,7 @@ class Metadata:
 
     def update_table(self):
         self.sql_cursor.execute("DROP TABLE " + self.table + ";")
-        self.sql_cursor.fetchall()
+        #self.sql_cursor.fetchall()
         self.sql_cursor.execute("CREATE TABLE " + self.table + " (" + ", ".join([tag[1:-1] + " text" for tag in self.tags]) + ");")
         self.sql_cursor.fetchall()
         dirs = [dirs for root, dirs, files in os.walk(self.directory) if dirs][0]
