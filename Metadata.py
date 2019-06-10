@@ -78,10 +78,11 @@ class Metadata:
         self.sql_cursor.execute("CREATE TABLE " + self.table + " (" + ", ".join([tag[1:-1] + " text" for tag in self.tags]) + ")")
         self.sql_cursor.fetchall()
         # Add FULLTEXT INDEX
-        self.sql_cursor.execute("CREATE FULLTEXT INDEX fulltextindex on " + self.table + "(" + ", ".join(map(lambda x: x[1:-1], self.tags)) + ");")
+        self.sql_cursor.execute("CREATE FULLTEXT INDEX fulltextindex ON " + self.table + " (" + ", ".join(map(lambda x: x[1:-1], self.tags)) + ");")
+        self.sql_cursor.fetchall()
         dirs = [dirs for root, dirs, files in os.walk(self.directory) if dirs][0]
         for dir in dirs:
-            self.
+            self.update_table_values(dir)
 
         """
         self.update_table_columns(dir, self.table)
@@ -110,12 +111,15 @@ class Metadata:
         self.sql_cursor.execute("DESC " + self.table + ";")
         return [x[0] for x in cursor.fetchall()]
 
-    def update_table_data(self, dir: str):
+    def update_table_values(self, dir: str):
         if os.path.exists(os.path.join(self.directory, dir, "metadata.txt")):
             with open(os.path.join(self.directory, dir, "metadata.txt"), "r") as metadata_file:
                 metadata_lines = metadata_file.readlines()
+            values = {}
             for tag in self.tags:
-                " ".join([line.strip() for line in metadata_lines[metadata_lines.index(tag + "\n") + 1:metadata_lines[metadata_lines.index(tag + "\n"):].index("\n")]])
+                values[tag[1:-1]] = " ".join(map(lambda x: x.strip(), metadata_lines[metadata_lines.index(tag + "\n") + 1:metadata_lines[metadata_lines.index(tag + "\n"):].index("\n")]))
+            self.sql_cursor.execute("INSERT INTO " + self.table + " (" + ", ".join(map(lambda x: x[1:-1], self.tags)) + ") VALUES (" + ", ".join([values[tag[1:-1]] for tag in self.tags]) + ");")
+            self.sql_cursor.fetchall()
 
     def cleanup(self):
         self.sql_connection.close()
