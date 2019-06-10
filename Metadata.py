@@ -1,24 +1,26 @@
 #!/usr/bin/python3
 # Metadata.py
 # Ashish D'Souza (computer_geek64 or computer-geek64)
-# June 9th, 2019
+# June 10th, 2019
 
 import os
 import mysql.connector as sql
-from getpass import getpass as password
+from getpass import getpass
 
 
 class Metadata:
     def __init__(self, directory: str, tags: tuple, **kwargs):
         self.directory = directory
         self.tags = tuple(["[" + tag + "]" for tag in tags])
-        self.user, self.host = input("user@host >> ").split("@")
-        self.password = password(self.user + "@" + self.host + "'s password: ")
-        if "database" in kwargs.keys():
-            self.sql_database = kwargs["database"]
-            self.sql_connection = sql.connect(host=self.host, user=self.user, password=self.password, database=self.sql_database)
+        if "user" not in kwargs.keys() and "host" not in kwargs.keys():
+            self.user, self.host = input("user@host >> ").split("@")
         else:
-            self.sql_connection = sql.connect(host=self.host, user=self.user, password=self.password)
+            self.user = kwargs["user"] if "user" in kwargs.keys() else input("user >> ")
+            self.host = kwargs["host"] if "host" in kwargs.keys() else input("host >> ")
+        self.password = kwargs["password"] if "password" in kwargs.keys() else getpass(self.user + "@" + self.host + "'s password: ")
+        self.database = kwargs["database"] if "database" in kwargs.keys() else input("database >> ")
+        self.table = kwargs["table"] if "table" in kwargs.keys() else input("table >> ")
+        self.sql_connection = sql.connect(host=self.host, user=self.user, password=self.password, database=self.database)
         self.sql_cursor = self.sql_connection.cursor()
 
     def create_all(self, overwrite=False, **kwargs) -> None:
@@ -70,23 +72,33 @@ class Metadata:
             unknown += [metadata_lines[i - 1].strip() + " " + dir for i in range(1, len(metadata_lines)) if metadata_lines[i] == "\n" and metadata_lines[i - 1].startswith("[")]
         return unknown
 
-    def update_table(self, table: str):
+    def update_table(self):
         dirs = [dirs for root, dirs, files in os.walk(self.directory) if dirs][0]
         for dir in dirs:
-            self.update_table_columns(dir, table)
+            self.update_table_columns(dir, self.table)
         # Remove empty columns
+        self.sql_cursor.execute("SELECT COUNT(*) FROM " self.table + ";")
+        rows = self.sql_cursor.fetchall()[0][0]
+        for column in self.get_table_columns():
+            self.sql_cursor.execute("SELECT COUNT(*) FROM " + self.table + " WHERE " + column + " IS NULL OR " + column + "=\"\";")
+            if self.sql_cursor.fetchall()[0][0] == rows:
+                # Drop column
+                self.sql_cursor.execute("ALTER TABLE " + self.table + " DROP " + column + ";"
 
-    def update_table_columns(self, dir: str, table: str):
+    def update_table_columns(self, dir: str):
         if os.path.exists(os.path.join(self.directory, dir, "metadata.txt")):
             with open(os.path.join(self.directory, dir, "metadata.txt"), "r") as metadata_file:
                 metadata_lines = metadata_file.readlines()
             tags = [line.strip()[1:-1] for line in metadata_lines if line.startswith("[")]
-            self.sql_cursor.execute("desc " + table + ";")
-            column_names = [x[0] for x in cursor.fetchall()]
+            columns = self.get_table_columns()
             for tag in tags:
-                if tag not in column_names:
-                    self.sql_cursor.execute("alter table " + table + " add " + tag + " text;")
+                if tag not in columns:
+                    self.sql_cursor.execute("ALTER TABLE " + self.table + " ADD " + tag + " text;")
                     self.sql_cursor.fetchall()
+
+    def get_table_columns(self):
+        self.sql_cursor.execute("DESC " + self.table + ";")
+        return [x[0] for x in cursor.fetchall()]
 
     def cleanup(self):
         self.sql_connection.close()
