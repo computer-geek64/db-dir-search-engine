@@ -73,9 +73,18 @@ class Metadata:
         return unknown
 
     def update_table(self):
+        self.sql_cursor.execute("DROP TABLE " + self.table)
+        self.sql_cursor.fetchall()
+        self.sql_cursor.execute("CREATE TABLE " + self.table + " (" + ", ".join([tag[1:-1] + " text" for tag in self.tags]) + ")")
+        self.sql_cursor.fetchall()
+        # Add FULLTEXT INDEX
+        self.sql_cursor.execute("CREATE FULLTEXT INDEX fulltextindex on " + self.table + "(" + ", ".join(map(lambda x: x[1:-1], self.tags)) + ");")
         dirs = [dirs for root, dirs, files in os.walk(self.directory) if dirs][0]
         for dir in dirs:
-            self.update_table_columns(dir, self.table)
+            self.
+
+        """
+        self.update_table_columns(dir, self.table)
         # Remove empty columns
         self.sql_cursor.execute("SELECT COUNT(*) FROM " self.table + ";")
         rows = self.sql_cursor.fetchall()[0][0]
@@ -83,7 +92,7 @@ class Metadata:
             self.sql_cursor.execute("SELECT COUNT(*) FROM " + self.table + " WHERE " + column + " IS NULL OR " + column + "=\"\";")
             if self.sql_cursor.fetchall()[0][0] == rows:
                 # Drop column
-                self.sql_cursor.execute("ALTER TABLE " + self.table + " DROP " + column + ";"
+                self.sql_cursor.execute("ALTER TABLE " + self.table + " DROP " + column + ";")
 
     def update_table_columns(self, dir: str):
         if os.path.exists(os.path.join(self.directory, dir, "metadata.txt")):
@@ -95,10 +104,18 @@ class Metadata:
                 if tag not in columns:
                     self.sql_cursor.execute("ALTER TABLE " + self.table + " ADD " + tag + " text;")
                     self.sql_cursor.fetchall()
+    """
 
     def get_table_columns(self):
         self.sql_cursor.execute("DESC " + self.table + ";")
         return [x[0] for x in cursor.fetchall()]
+
+    def update_table_data(self, dir: str):
+        if os.path.exists(os.path.join(self.directory, dir, "metadata.txt")):
+            with open(os.path.join(self.directory, dir, "metadata.txt"), "r") as metadata_file:
+                metadata_lines = metadata_file.readlines()
+            for tag in self.tags:
+                " ".join([line.strip() for line in metadata_lines[metadata_lines.index(tag + "\n") + 1:metadata_lines[metadata_lines.index(tag + "\n"):].index("\n")]])
 
     def cleanup(self):
         self.sql_connection.close()
