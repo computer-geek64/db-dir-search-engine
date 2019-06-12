@@ -51,6 +51,8 @@ class Metadata:
                         if tag[1:-1] in kwargs.keys():
                             for value in kwargs[tag[1:-1]]:
                                 output += value + "\n"
+                        elif tag[1:-1] == "title":
+                            output += dir + "\n"
                         output += "\n"
                         metadata_file.write(output)
 
