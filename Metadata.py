@@ -36,8 +36,13 @@ class Metadata:
                 for tag in self.tags:
                     output += tag + "\n"
                     if tag[1:-1] in kwargs.keys():
-                        for value in kwargs[tag[1:-1]]:
-                            output += value + "\n"
+                        if type(kwargs[tag[1:-1]]) == str:
+                            output += kwargs[tag[1:-1]] + "\n"
+                        else:
+                            for value in kwargs[tag[1:-1]]:
+                                output += value + "\n"
+                    elif tag[1:-1] == "title":
+                        output += dir + "\n"
                     output += "\n"
                 metadata_file.write(output)
         else:
@@ -49,8 +54,11 @@ class Metadata:
                     with open(os.path.join(self.directory, dir, "metadata.txt"), "a") as metadata_file:
                         output = tag + "\n"
                         if tag[1:-1] in kwargs.keys():
-                            for value in kwargs[tag[1:-1]]:
-                                output += value + "\n"
+                            if type(kwargs[tag[1:-1]]) == str:
+                                output += kwargs[tag[1:-1]] + "\n"
+                            else:
+                                for value in kwargs[tag[1:-1]]:
+                                    output += value + "\n"
                         elif tag[1:-1] == "title":
                             output += dir + "\n"
                         output += "\n"
