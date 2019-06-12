@@ -129,7 +129,7 @@ class Metadata:
             self.sql_cursor.execute("INSERT INTO " + self.table + " (" + ", ".join(map(lambda x: x[1:-1], self.tags)) + ") VALUES (" + ", ".join([values[tag[1:-1]] for tag in self.tags]) + ");")
 
     def fulltextsearch(self, search: str):
-        self.sql_cursor.execute("SELECT title FROM " + self.table + " WHERE MATCH (" + ", ".join(map(lambda x: x[1:-1], self.tags)) + ") AGAINST (\"" + search + "\");")
+        self.sql_cursor.execute("SELECT * FROM " + self.table + " WHERE MATCH (" + ", ".join(map(lambda x: x[1:-1], self.tags)) + ") AGAINST (\"" + search + "\");")
         return self.sql_cursor.fetchall()
 
     def cleanup(self):
