@@ -67,10 +67,10 @@ class Metadata:
 
     def update_title(self, dir: str):
         if os.path.exists(os.path.join(self.directory, dir, "metadata.txt")):
-            with open(os.path.join(self.directory, dir, "metadata.txt"), "r+") as metadata_file:
+            with open(os.path.join(self.directory, dir, "metadata.txt"), "r") as metadata_file:
                 metadata_lines = metadata_file.readlines()
-                metadata_lines[metadata_lines.index("[title]\n") + 1] = os.path.basename(os.getcwd() + "\n")
-                metadata_file.seek(0)
+            metadata_lines[metadata_lines.index("[title]\n") + 1] = os.path.basename(dir + "\n")
+            with open(os.path.join(self.directory, dir, "metadata.txt"), "w") as metadata_file:
                 metadata_file.writelines(metadata_lines)
 
     def remove_all(self):
