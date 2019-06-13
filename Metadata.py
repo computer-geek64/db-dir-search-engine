@@ -36,7 +36,6 @@ class Metadata:
                 for tag in self.tags:
                     output += tag + "\n"
                     if tag[1:-1] in kwargs.keys():
-                        print(kwargs[tag[1:-1]])
                         if type(kwargs[tag[1:-1]]) == str:
                             output += kwargs[tag[1:-1]] + "\n"
                         else:
