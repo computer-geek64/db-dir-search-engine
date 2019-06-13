@@ -27,6 +27,7 @@ class Metadata:
         dirs = [dirs for root, dirs, files in os.walk(self.directory) if dirs][0]
         for dir in dirs:
             self.create(dir, overwrite, **kwargs)
+            self.update_title(dir)
 
     def create(self, dir: str, overwrite=False, **kwargs) -> None:
         if not os.path.exists(os.path.join(self.directory, dir, "metadata.txt")) or overwrite:
@@ -63,6 +64,14 @@ class Metadata:
                             output += dir + "\n"
                         output += "\n"
                         metadata_file.write(output)
+
+    def update_title(self, dir: str):
+        if os.path.exists(os.path.join(self.directory, dir, "metadata.txt")):
+            with open(os.path.join(self.directory, dir, "metadata.txt"), "r+") as metadata_file:
+                metadata_lines = metadata_file.readlines()
+                metadata_lines[metadata_lines.index("[title]\n") + 1] = os.path.basename(os.getcwd() + "\n")
+                metadata_file.seek(0)
+                metadata_file.writelines(metadata_lines)
 
     def remove_all(self):
         dirs = [dirs for root, dirs, files in os.walk(self.directory) if dirs][0]
