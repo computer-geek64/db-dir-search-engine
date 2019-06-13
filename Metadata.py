@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # Metadata.py
 # Ashish D'Souza (computer_geek64 or computer-geek64)
-# June 10th, 2019
+# June 13th, 2019
 
 import os
 import mysql.connector as sql
