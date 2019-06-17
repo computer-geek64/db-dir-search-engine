@@ -139,6 +139,7 @@ class Metadata:
 
     def search(self, query: str):
         fulltextquery = " ".join([word + "*" for word in query.split(" ")])
+        query = " ".join([word[1:] if word.startswith("+") else word for word in query.split(" ") if not word.startswith("-")])
         where = ["MATCH (" + ", ".join(map(lambda x: x[1:-1], self.tags)) + ") AGAINST (\'" + fulltextquery + "\' IN BOOLEAN MODE)"] + [tag[1:-1] + " LIKE \'%" + query + "%\'" for tag in self.tags]
         self.sql_cursor.execute("SELECT * FROM " + self.table + " WHERE " + " OR ".join(where) + ";")
         return self.sql_cursor.fetchall()
