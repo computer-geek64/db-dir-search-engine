@@ -138,7 +138,7 @@ class Metadata:
             self.sql_cursor.execute("INSERT INTO " + self.table + " (" + ", ".join(map(lambda x: x[1:-1], self.tags)) + ") VALUES (" + ", ".join([values[tag[1:-1]] for tag in self.tags]) + ");")
 
     def search(self, query: str):
-        fulltextquery = " ".join([word + "*" for word in query.split(" ")])
+        fulltextquery = " ".join(["+" + word + "*" for word in query.split(" ")])
         query = " ".join([word[1:] if word.startswith("+") else word for word in query.split(" ") if not word.startswith("-")])
         where = ["MATCH (" + ", ".join(map(lambda x: x[1:-1], self.tags)) + ") AGAINST (\'" + fulltextquery + "\' IN BOOLEAN MODE)"] + [tag[1:-1] + " LIKE \'%" + query + "%\'" for tag in self.tags]
         self.sql_cursor.execute("SELECT * FROM " + self.table + " WHERE " + " OR ".join(where) + ";")
